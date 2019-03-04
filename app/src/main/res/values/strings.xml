@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">FinalProject</string>
+    <string name="image_description">Product Image</string>
+    <string name="search_edit_hint">Search</string>
+    <string name="product_price">Price</string>
+    <string name="product_des">Description</string>
+    <string name="product_image">Image(s)</string>
+    <string name="product_name">Product Name</string>
+    <string name="add_product">Add</string>
+    <string name="btnLoginText">Login</string>
+    <string name="btnCancelText">Cancel</string>
+</resources>
