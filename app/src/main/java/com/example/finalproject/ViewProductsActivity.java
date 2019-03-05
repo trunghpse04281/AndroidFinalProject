@@ -227,7 +227,6 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
                     try {
                         System.out.println(response);
                         lstCategory = new ArrayList<>();
-                        lstCategory.add(new Category(-1, "Tất cả"));
                         Gson gson = new Gson();
                         Type collectionType = new TypeToken<ArrayList<Category>>() {
                         }.getType();
