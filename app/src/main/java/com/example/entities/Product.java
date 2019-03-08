@@ -1,9 +1,10 @@
 package com.example.entities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Product {
+public class Product implements Serializable {
     private int id;
     private String name;
     private String description;

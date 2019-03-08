@@ -1,4 +1,4 @@
-package com.example.services;
+package com.example.adapter;
 
 import android.content.Context;
 import android.net.Uri;

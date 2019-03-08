@@ -21,9 +21,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.cloudinary.android.MediaManager;
-import com.cloudinary.android.callback.ErrorInfo;
-import com.cloudinary.android.callback.UploadCallback;
-import com.example.services.ImageAdapter;
+import com.example.adapter.ImageAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;

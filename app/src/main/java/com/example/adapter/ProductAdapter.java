@@ -1,7 +1,9 @@
-package com.example.services;
+package com.example.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +17,10 @@ import android.widget.TextView;
 
 import com.example.entities.Product;
 import com.example.finalproject.R;
+import com.example.finalproject.ViewOneProductActivity;
+import com.example.services.HandlerImageURL;
+import com.example.services.ItemClickListener;
+import com.example.services.OnLoadMoreListener;
 
 import java.util.List;
 
@@ -64,10 +70,10 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         if (viewType == VIEW_TYPE_ITEM) {
             View view = LayoutInflater.from(activity).inflate(R.layout.product_list_item, parent, false);
-            return new RecycleViewHolder(view);
+            return new RecycleViewHolder(view, parent.getContext());
         } else if (viewType == VIEW_TYPE_LOADING) {
             View view = LayoutInflater.from(activity).inflate(R.layout.item_loading, parent, false);
             return new LoadingViewHolder(view);
@@ -92,10 +98,23 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             } else {
                 recycleViewHolder.imgProduct.setImageResource(R.drawable.product_default);
             }
+
+            ((RecycleViewHolder) holder).setItemClickListener(new ItemClickListener() {
+                @Override
+                public void onClick(View view, int position, boolean isLongClick) {
+
+                    Intent intent = new Intent(activity, ViewOneProductActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("Product", lstProduct.get(position));
+                    intent.putExtras(bundle);
+                    activity.startActivityForResult(intent, 1000);
+                }
+            });
         } else if (holder instanceof LoadingViewHolder) {
             LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
             loadingViewHolder.progressBar.setIndeterminate(true);
         }
+
     }
 
     @Override
@@ -117,19 +136,34 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    private class RecycleViewHolder extends RecyclerView.ViewHolder {
+    private static class RecycleViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView tvName;
         private TextView tvDescription;
         private TextView tvPrice;
         private ImageView imgProduct;
+        private Context context;
 
-        public RecycleViewHolder(@NonNull View itemView) {
+        private ItemClickListener itemClickListener;
+
+
+        public RecycleViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
+            this.context = context;
             tvName = itemView.findViewById(R.id.tvName);
             tvDescription = itemView.findViewById(R.id.tvDescription);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             imgProduct = itemView.findViewById(R.id.imgProduct);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            itemClickListener.onClick(v, getAdapterPosition(), false);
+        }
+
+        public void setItemClickListener(ItemClickListener itemClickListener) {
+            this.itemClickListener = itemClickListener;
         }
     }
 }
