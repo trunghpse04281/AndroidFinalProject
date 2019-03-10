@@ -13,10 +13,15 @@ import com.example.finalproject.R;
 import com.example.services.HandlerImageURL;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ImageAdapterForRecyclerView extends RecyclerView.Adapter<ImageAdapterForRecyclerView.ViewHolder> {
 
-    private ArrayList<String> mArrayUri;
+    private List<String> mArrayUri;
+
+    public ImageAdapterForRecyclerView(List<String> mArrayUri) {
+        this.mArrayUri = mArrayUri;
+    }
 
     @NonNull
     @Override

@@ -13,6 +13,7 @@ public class Product implements Serializable {
     private String category;
     private String onwer;
     private List<String> lst_images;
+    private String status;
 
     public Product() {
     }
@@ -89,5 +90,13 @@ public class Product implements Serializable {
 
     public void setLst_images(List<String> lst_images) {
         this.lst_images = lst_images;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

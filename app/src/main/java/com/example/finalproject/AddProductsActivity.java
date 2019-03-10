@@ -13,27 +13,48 @@ import android.support.design.button.MaterialButton;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.cloudinary.android.MediaManager;
+import com.example.adapter.CategoryAdapterForSpinner;
 import com.example.adapter.ImageAdapter;
+import com.example.entities.Category;
+import com.example.entities.Product;
+import com.example.services.Constants;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AddProductsActivity extends AppCompatActivity implements View.OnClickListener {
+public class AddProductsActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
     private MaterialButton btnAddProduct;
     private MaterialButton btnUploadImage;
     private TextInputEditText editProductName;
     private TextInputEditText editProductDes;
     private TextInputEditText editProductPrice;
+    private Spinner spinnerCategory;
+    RequestQueue mRequestQueue;
+    private ArrayList<Category> lstCategory;
 
     private final int PICK_IMAGE_MULTIPLE = 1;
     private ImageView imageView;
@@ -54,6 +75,9 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
     ArrayList<Uri> mArrayUri;
     private ImageView testImg;
 
+    private Integer currentID = -1;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,12 +86,19 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
+
+        mRequestQueue = Volley.newRequestQueue(AddProductsActivity.this);
         uploadImgIntent = new Intent();
+        getCategory();
         connectVIew();
 
     }
 
     private void connectVIew() {
+        editProductName = findViewById(R.id.editProductName);
+        editProductDes = findViewById(R.id.editProductDes);
+        editProductPrice = findViewById(R.id.editProductPrice);
+        spinnerCategory = findViewById(R.id.spinnerCategory);
         btnAddProduct = findViewById(R.id.btnAddProduct);
         btnUploadImage = findViewById(R.id.btnUploadImage);
         imageView = findViewById(R.id.imgProduct);
@@ -77,6 +108,15 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
         btnUploadImage.setOnClickListener(this);
 
         testImg = findViewById(R.id.testImg);
+
+
+        spinnerCategory.setOnItemSelectedListener(this);
+
+    }
+
+    private void initSpinner() {
+        CategoryAdapterForSpinner adapter = new CategoryAdapterForSpinner(getApplicationContext(), lstCategory);
+        spinnerCategory.setAdapter(adapter);
     }
 
     @Override
@@ -86,7 +126,7 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
                 chooseImages();
                 break;
             case R.id.btnAddProduct:
-                uploadImage();
+                addProduct();
                 break;
         }
     }
@@ -185,7 +225,39 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
         new UploadImage().execute();
     }
 
-    public class UploadImage extends AsyncTask<Void, Void, String> {
+    private void addProduct() {
+        boolean error = false;
+        if (TextUtils.isEmpty(editProductName.getText().toString())) {
+            editProductName.requestFocus();
+            editProductName.setError(AddProductsActivity.this.getResources().getString(R.string.error_field_required));
+            error = true;
+        } else if (TextUtils.isEmpty(editProductPrice.getText().toString())) {
+            editProductPrice.requestFocus();
+            editProductPrice.setError(AddProductsActivity.this.getResources().getString(R.string.error_field_required));
+            error = true;
+        } else {
+            try {
+                Double.parseDouble(editProductPrice.getText().toString());
+            } catch (Exception ex) {
+                editProductPrice.requestFocus();
+                editProductPrice.setError(AddProductsActivity.this.getResources().getString(R.string.error_number_input));
+                error = true;
+            }
+        }
+        uploadImage();
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    private class UploadImage extends AsyncTask<Void, Void, String> {
 
         @Override
         protected String doInBackground(Void... voids) {
@@ -210,6 +282,102 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+        }
+    }
+
+
+    private String insertProductToDBUrl;
+
+    private void InsertProductToDB() {
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme(Constants.HTTP_PROTOCOL)
+                .encodedAuthority(Constants.HOST)
+                .appendPath("product")
+                .appendPath("insert");
+        insertProductToDBUrl = builder.build().toString();
+        new InsertProductToDB().execute();
+    }
+
+    private class InsertProductToDB extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            StringRequest strRequest = new StringRequest(Request.Method.POST, insertProductToDBUrl, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        System.out.println(insertProductToDBUrl);
+                        Gson gson = new Gson();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    HashMap<String, String> params = new HashMap<>();
+                    params.put("name", editProductName.getText().toString());
+                    params.put("price", editProductPrice.getText().toString());
+                    params.put("description", editProductDes.getText().toString());
+                    params.put("name", editProductName.getText().toString());
+                    return params;
+                }
+            };
+            mRequestQueue.add(strRequest);
+            return null;
+        }
+    }
+
+    private String categoryUrl;
+
+    public void getCategory() {
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme(Constants.HTTP_PROTOCOL)
+                .encodedAuthority(Constants.HOST)
+                .appendPath("category")
+                .appendPath("getAll");
+        categoryUrl = builder.build().toString();
+        new getCategory().execute();
+    }
+
+    private class getCategory extends AsyncTask<Void, Void, String> {
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            StringRequest strRequest = new StringRequest(Request.Method.GET, categoryUrl, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        System.out.println(response);
+                        lstCategory = new ArrayList<>();
+                        Gson gson = new Gson();
+                        Type collectionType = new TypeToken<ArrayList<Category>>() {
+                        }.getType();
+                        lstCategory = gson.fromJson(response, collectionType);
+                        initSpinner();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            });
+            mRequestQueue.add(strRequest);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String strings) {
+            super.onPostExecute(strings);
         }
     }
 }

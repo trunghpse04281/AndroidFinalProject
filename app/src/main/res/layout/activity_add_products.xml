@@ -53,6 +53,13 @@
 
         </android.support.design.widget.TextInputLayout>
 
+        <Spinner
+            android:id="@+id/spinnerCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </Spinner>
+
         <android.support.design.button.MaterialButton
             android:id="@+id/btnUploadImage"
             android:layout_width="wrap_content"
