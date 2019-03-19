@@ -82,9 +82,9 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
         } else {
 
         }
-        initDrawer(R.menu.drawer_view);
         connectView();
         getProductByCategory("Tất cả");
+        initDrawer(R.menu.drawer_view);
     }
 
     private void connectView() {

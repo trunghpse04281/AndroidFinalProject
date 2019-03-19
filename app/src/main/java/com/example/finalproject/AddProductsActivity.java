@@ -10,11 +10,17 @@ import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.button.MaterialButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -76,6 +82,10 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
     private ImageView testImg;
 
     private Integer currentID = -1;
+    private String curentCategory = "Đồ ăn";
+
+
+    private DrawerLayout drawerLayout;
 
 
     @Override
@@ -91,7 +101,48 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
         uploadImgIntent = new Intent();
         getCategory();
         connectVIew();
+        initDrawer(R.menu.drawer_view);
+    }
 
+    public void initDrawer(int menuId) {
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.inflateMenu(menuId);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        // set item as selected to persist highlight
+                        menuItem.setChecked(true);
+
+                        if (menuItem.toString().equalsIgnoreCase("login")) {
+                            Intent intent = new Intent(AddProductsActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                        }
+                        // close drawer when item is tapped
+                        drawerLayout.closeDrawers();
+
+                        // Add code here to update the UI based on the item selected
+                        // For example, swap UI fragments here
+
+                        return true;
+                    }
+                });
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                drawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void connectVIew() {
@@ -244,18 +295,23 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
                 error = true;
             }
         }
-        uploadImage();
+        if (error == false) {
+            uploadImage();
+        }
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+        curentCategory = lstCategory.get(position).getName();
+        Toast.makeText(this, curentCategory, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+
+    private String imgeString = "";
 
     private class UploadImage extends AsyncTask<Void, Void, String> {
 
@@ -271,10 +327,15 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
 
             } finally {
                 for (int i = 0; i < mArrayUri.size(); i++) {
-                    String requestId = MediaManager.get().upload(mArrayUri.get(i)).option("public_id", "image" + i).dispatch();
-                    String url = MediaManager.get().url().generate("image" + i);
-                    System.out.println("Request=>>>>>>>>>>>>>>>>>" + url);
+//                    String requestId = MediaManager.get().upload(mArrayUri.get(i)).option("public_id", currentID + "image" + i).dispatch();
+//                    String url = MediaManager.get().url().generate(currentID + "image" + i);
+//                    System.out.println("Request=>>>>>>>>>>>>>>>>>" + url);
+                    String url = "sdfdsfsdfsdfdsfsdfsdfdsfsd";
+                    imgeString += url + ",";
                 }
+
+                insertProductToDB();
+//                updateImageProduct();
             }
             return null;
         }
@@ -288,50 +349,46 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
 
     private String insertProductToDBUrl;
 
-    private void InsertProductToDB() {
+    private void insertProductToDB() {
         Uri.Builder builder = new Uri.Builder();
         builder.scheme(Constants.HTTP_PROTOCOL)
                 .encodedAuthority(Constants.HOST)
                 .appendPath("product")
                 .appendPath("insert");
         insertProductToDBUrl = builder.build().toString();
-        new InsertProductToDB().execute();
-    }
 
-    private class InsertProductToDB extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            StringRequest strRequest = new StringRequest(Request.Method.POST, insertProductToDBUrl, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        System.out.println(insertProductToDBUrl);
-                        Gson gson = new Gson();
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        StringRequest strRequest = new StringRequest(Request.Method.POST, insertProductToDBUrl, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    System.out.println(insertProductToDBUrl);
+                    Gson gson = new Gson();
+                    System.out.println(response);
+                    currentID = Integer.parseInt(response);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
 
-                }
-            }) {
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    HashMap<String, String> params = new HashMap<>();
-                    params.put("name", editProductName.getText().toString());
-                    params.put("price", editProductPrice.getText().toString());
-                    params.put("description", editProductDes.getText().toString());
-                    params.put("name", editProductName.getText().toString());
-                    return params;
-                }
-            };
-            mRequestQueue.add(strRequest);
-            return null;
-        }
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                HashMap<String, String> params = new HashMap<>();
+                params.put("name", editProductName.getText().toString());
+                params.put("price", editProductPrice.getText().toString());
+                params.put("description", editProductDes.getText().toString());
+                params.put("image_url", imgeString);
+                params.put("category", curentCategory);
+                params.put("owner", "trung");
+                params.put("status", "Còn hàng");
+                return params;
+            }
+        };
+        mRequestQueue.add(strRequest);
     }
 
     private String categoryUrl;
@@ -360,6 +417,7 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
                         Type collectionType = new TypeToken<ArrayList<Category>>() {
                         }.getType();
                         lstCategory = gson.fromJson(response, collectionType);
+                        lstCategory.remove(0);
                         initSpinner();
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -379,5 +437,45 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
         protected void onPostExecute(String strings) {
             super.onPostExecute(strings);
         }
+    }
+
+    private String updateImageProductUrl;
+
+    public void updateImageProduct() {
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme(Constants.HTTP_PROTOCOL)
+                .encodedAuthority(Constants.HOST)
+                .appendPath("product")
+                .appendPath("updateImgProduct");
+        updateImageProductUrl = builder.build().toString();
+
+        StringRequest strRequest = new StringRequest(Request.Method.POST, insertProductToDBUrl, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    System.out.println(updateImageProductUrl);
+                    System.out.println(response);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                HashMap<String, String> params = new HashMap<>();
+                params.put("id", String.valueOf(currentID - 1));
+                params.put("imageString", imgeString);
+                return params;
+            }
+        };
+        mRequestQueue.add(strRequest);
+        System.out.println("thanh cong");
+        System.out.println(imgeString);
+
     }
 }
