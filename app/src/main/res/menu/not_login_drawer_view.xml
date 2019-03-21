@@ -4,21 +4,12 @@
     android:layout_height="wrap_content">
 
     <group android:checkableBehavior="single">
-
         <item
             android:id="@+id/nav_login"
             android:title="@string/btnLoginText" />
 
         <item
-            android:id="@+id/nav_gallery"
-            android:title="gallery" />
-
-        <item
-            android:id="@+id/nav_slideshow"
-            android:title="slideshow" />
-
-        <item
-            android:id="@+id/nav_manage"
-            android:title="tools" />
+            android:id="@+id/nav_register"
+            android:title="@string/registerText" />
     </group>
 </menu>

@@ -1,8 +1,6 @@
 package com.example.finalproject;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,10 +24,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.entities.User;
 import com.example.services.Constants;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.example.services.Entity;
+import com.google.gson.Gson;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,12 +41,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private String tag = LoginActivity.class.getSimpleName();
 
-    private String url = "";
-    private String user_name = "";
-    private String password = "";
+    private String loginUrl = "";
     RequestQueue mRequestQueue;
 
     private DrawerLayout drawerLayout;
+    private User current_user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +53,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
         mRequestQueue = Volley.newRequestQueue(LoginActivity.this);
         connectView();
-
-        initDrawer(R.menu.drawer_view);
+        initDrawer(R.menu.not_login_drawer_view);
     }
 
     public void initDrawer(int menuId) {
@@ -116,18 +112,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         switch (v.getId()) {
             case R.id.btnLogin:
                 logIn();
+                Intent intent = new Intent(LoginActivity.this, ViewProductsActivity.class);
+                startActivityForResult(intent, 1000);
+                finish();
                 break;
             case R.id.btnCancel:
                 break;
         }
-    }
-
-    public void saveData(String user_name) {
-        SharedPreferences pre = getSharedPreferences(Constants.FILE_DATA_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor edit = pre.edit();
-        edit.putString("user_name", user_name);
-        edit.commit();
-        Toast.makeText(LoginActivity.this, "Login successfully for account: " + user_name, Toast.LENGTH_LONG).show();
     }
 
     public void logIn() {
@@ -136,7 +127,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 .encodedAuthority(Constants.HOST)
                 .appendPath("account")
                 .appendPath("login");
-        url = builder.build().toString();
+        loginUrl = builder.build().toString();
         new HandleRequest().execute();
     }
 
@@ -145,22 +136,22 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         @Override
         protected Void doInBackground(Void... voids) {
 
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, loginUrl, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     Log.e(tag, "onResponse: " + response);
                     try {
                         if (!response.trim().equals("")) {
-                            JSONObject jsonObject = new JSONObject(response);
-                            user_name = jsonObject.getString("user_name");
-                            password = jsonObject.getString("password");
+                            current_user = new User();
+                            Gson gson = new Gson();
+                            current_user = gson.fromJson(response, User.class);
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    saveData(user_name);
+                                    Entity.saveCurrentUser(LoginActivity.this, current_user);
                                 }
                             });
-                            Log.e(tag, "User =>>>>" + jsonObject.getString("user_name"));
+                            Toast.makeText(LoginActivity.this, "Login Successfully", Toast.LENGTH_LONG).show();
                         } else {
                             runOnUiThread(new Runnable() {
                                 @Override
@@ -169,7 +160,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                 }
                             });
                         }
-                    } catch (JSONException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }

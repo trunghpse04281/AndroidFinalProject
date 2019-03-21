@@ -40,14 +40,12 @@ import com.cloudinary.android.MediaManager;
 import com.example.adapter.CategoryAdapterForSpinner;
 import com.example.adapter.ImageAdapter;
 import com.example.entities.Category;
-import com.example.entities.Product;
 import com.example.services.Constants;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +99,7 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
         uploadImgIntent = new Intent();
         getCategory();
         connectVIew();
-        initDrawer(R.menu.drawer_view);
+        initDrawer(R.menu.logged_in_drawer_view);
     }
 
     public void initDrawer(int menuId) {

@@ -1,12 +1,11 @@
 package com.example.finalproject;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -33,6 +32,7 @@ import com.example.entities.Product;
 import com.example.adapter.CategoryAdapter;
 import com.example.services.Constants;
 import com.example.adapter.ProductAdapter;
+import com.example.services.Entity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -44,7 +44,7 @@ import java.util.Map;
 
 public class ViewProductsActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private String user_name;
+    private String currentUser;
     private RecyclerView productList;
     private ArrayList<Product> lstProduct;
     private RecyclerView.LayoutManager productLayoutManager;
@@ -75,16 +75,14 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
-        SharedPreferences share = getSharedPreferences(Constants.FILE_DATA_NAME, Context.MODE_PRIVATE);
-        this.user_name = share.getString("user_name", "");
-        if (!user_name.equals("")) {
-
+        currentUser = Entity.getCurrentUser(ViewProductsActivity.this);
+        if (currentUser.equalsIgnoreCase("")) {
+            initDrawer(R.menu.not_login_drawer_view);
         } else {
-
+            initDrawer(R.menu.logged_in_drawer_view);
         }
         connectView();
         getProductByCategory("Tất cả");
-        initDrawer(R.menu.drawer_view);
     }
 
     private void connectView() {
@@ -154,8 +152,14 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.flBtnAddProduct:
-                Intent intent = new Intent(this, AddProductsActivity.class);
-                startActivityForResult(intent, 0);
+                if (currentUser.equalsIgnoreCase("")) {
+                    Toast.makeText(ViewProductsActivity.this, "You must login to use this function", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    startActivityForResult(intent, 0);
+                } else {
+                    Intent intent = new Intent(this, AddProductsActivity.class);
+                    startActivityForResult(intent, 0);
+                }
                 break;
         }
     }
@@ -174,6 +178,11 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
                         if (menuItem.toString().equalsIgnoreCase("login")) {
                             Intent intent = new Intent(ViewProductsActivity.this, LoginActivity.class);
                             startActivity(intent);
+                        } else if (menuItem.toString().equalsIgnoreCase("logout")) {
+                            Entity.deleteCurrentUser(ViewProductsActivity.this);
+                            Intent intent = new Intent(ViewProductsActivity.this, ViewProductsActivity.class);
+                            startActivity(intent);
+                            finish();
                         }
                         // close drawer when item is tapped
                         drawerLayout.closeDrawers();
@@ -360,6 +369,19 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
             };
             mRequestQueue.add(strRequest);
             return null;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode == 200) {
+            if (requestCode == 1000) {
+                if (currentUser.equalsIgnoreCase("")) {
+                    initDrawer(R.menu.not_login_drawer_view);
+                } else {
+                    initDrawer(R.menu.logged_in_drawer_view);
+                }
+            }
         }
     }
 }

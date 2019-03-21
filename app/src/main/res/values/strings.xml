@@ -11,4 +11,7 @@
     <string name="btnCancelText">Cancel</string>
     <string name="error_field_required">Please input this field</string>
     <string name="error_number_input">Please input a number</string>
+    <string name="logoutText">Logout</string>
+    <string name="registerText">Register</string>
+    <string name="myProductsText">My Product</string>
 </resources>
