@@ -169,7 +169,6 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
     }
 
     public void onCategoryClick(String value) {
-        Toast.makeText(this, value, Toast.LENGTH_SHORT).show();
         getProductByCategory(value);
     }
 

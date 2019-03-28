@@ -310,14 +310,13 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
             }
         }
         if (error == false) {
-            uploadImage();
+            insertProductToDB();
         }
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         curentCategory = lstCategory.get(position).getName();
-        Toast.makeText(this, curentCategory, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -341,15 +340,13 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
 
             } finally {
                 for (int i = 0; i < mArrayUri.size(); i++) {
-//                    String requestId = MediaManager.get().upload(mArrayUri.get(i)).option("public_id", currentID + "image" + i).dispatch();
-//                    String url = MediaManager.get().url().generate(currentID + "image" + i);
-//                    System.out.println("Request=>>>>>>>>>>>>>>>>>" + url);
-                    String url = "sdfdsfsdfsdfdsfsdfsdfdsfsd";
+                    String requestId = MediaManager.get().upload(mArrayUri.get(i)).option("public_id", currentID + "image" + i).dispatch();
+                    String url = MediaManager.get().url().generate(currentID + "image" + i);
+                    System.out.println("Request=>>>>>>>>>>>>>>>>>" + url);
+//                    String url = "sdfdsfsdfsdfdsfsdfsdfdsfsd";
                     imgeString += url + ",";
                 }
-
-                insertProductToDB();
-//                updateImageProduct();
+                Toast.makeText(AddProductsActivity.this, "Add Successfully", Toast.LENGTH_LONG).show();
             }
             return null;
         }
@@ -379,7 +376,7 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
                     Gson gson = new Gson();
                     System.out.println(response);
                     currentID = Integer.parseInt(response);
-                    Toast.makeText(AddProductsActivity.this, "Add Successfully", Toast.LENGTH_LONG).show();
+                    uploadImage();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

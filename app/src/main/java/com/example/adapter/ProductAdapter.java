@@ -89,7 +89,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             recycleViewHolder.tvName.setText(lstProduct.get(position).getName());
             recycleViewHolder.tvDescription.setText(lstProduct.get(position).getDescription());
             recycleViewHolder.tvPrice.setText(String.valueOf(lstProduct.get(position).getPrice()));
-            if (lstProduct.get(position).getImage_url() != null) {
+            if (lstProduct.get(position).getImage_url() != null && !lstProduct.get(position).getImage_url().equals("")) {
                 try {
                     recycleViewHolder.imgProduct.setImageDrawable(HandlerImageURL.LoadImageFromWebOperations(lstProduct.get(position).getLst_images().get(0)));
                 } catch (Exception e) {
