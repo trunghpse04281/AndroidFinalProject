@@ -1,17 +1,21 @@
 <resources>
     <string name="app_name">FinalProject</string>
     <string name="image_description">Product Image</string>
-    <string name="search_edit_hint">Search</string>
+    <string name="search_edit_hint">Type 3 chars to search</string>
     <string name="product_price">Price</string>
     <string name="product_des">Description</string>
     <string name="product_image">Image(s)</string>
     <string name="product_name">Product Name</string>
     <string name="add_product">Add</string>
-    <string name="btnLoginText">Login</string>
-    <string name="btnCancelText">Cancel</string>
+    <string name="btnLoginLabel">Login</string>
+    <string name="btnCancelLabel">Cancel</string>
     <string name="error_field_required">Please input this field</string>
     <string name="error_number_input">Please input a number</string>
-    <string name="logoutText">Logout</string>
-    <string name="registerText">Register</string>
-    <string name="myProductsText">My Product</string>
+    <string name="logoutLabel">Logout</string>
+    <string name="registerLabel">Register</string>
+    <string name="myProductsLabel">My Product</string>
+    <string name="userNameLabel">User Name</string>
+    <string name="passwordLabel">Password</string>
+    <string name="phoneLabel">Phone number</string>
+    <string name="rePasswordLabel">Re-enter password</string>
 </resources>

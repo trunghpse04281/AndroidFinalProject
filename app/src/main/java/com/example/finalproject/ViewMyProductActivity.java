@@ -3,7 +3,6 @@ package com.example.finalproject;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -12,6 +11,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -30,11 +30,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.adapter.CategoryAdapter;
+import com.example.adapter.ProductAdapter;
 import com.example.entities.Category;
 import com.example.entities.Product;
-import com.example.adapter.CategoryAdapter;
 import com.example.services.Constants;
-import com.example.adapter.ProductAdapter;
 import com.example.services.Entity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -45,7 +45,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ViewProductsActivity extends AppCompatActivity implements View.OnClickListener {
+public class ViewMyProductActivity extends AppCompatActivity implements View.OnClickListener {
 
     private String currentUser;
     private DrawerLayout drawerLayout;
@@ -53,7 +53,6 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
     private ArrayList<Product> lstProduct;
     private RecyclerView.LayoutManager productLayoutManager;
     private ProductAdapter productAdapter;
-    private EditText editSearch;
 
     private String categoryUrl;
     private String productUrl;
@@ -67,20 +66,18 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
     private RecyclerView.LayoutManager categoryLayoutManager;
     private FloatingActionButton flBtnAddProduct;
 
-    private static final int DATA_PAGE_SIZE = 10;
-    private int DATA_CURRENT_PAGE = 1;
-    private boolean isFirstTimeLoad = true;
     private String searchString = "";
+    private EditText editSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_view_products);
+        setContentView(R.layout.activity_view_my_product);
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
-        currentUser = Entity.getCurrentUser(ViewProductsActivity.this);
+        currentUser = Entity.getCurrentUser(ViewMyProductActivity.this);
         if (currentUser.equalsIgnoreCase("")) {
             initDrawer(R.menu.not_login_drawer_view);
         } else {
@@ -92,7 +89,7 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
 
     private void connectView() {
         lstProduct = new ArrayList<>();
-        mRequestQueue = Volley.newRequestQueue(ViewProductsActivity.this);
+        mRequestQueue = Volley.newRequestQueue(ViewMyProductActivity.this);
         productList = findViewById(R.id.productList);
         categoryList = findViewById(R.id.categoryList);
         getCategory();
@@ -120,7 +117,6 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
 
             }
         });
-
     }
 
     private void loadProductList() {
@@ -162,15 +158,10 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
         ((LinearLayoutManager) categoryLayoutManager).setOrientation(LinearLayout.HORIZONTAL);
         categoryList.setLayoutManager(categoryLayoutManager);
 
-        categoryAdapter = new CategoryAdapter(lstCategory, ViewProductsActivity.this);
+        categoryAdapter = new CategoryAdapter(lstCategory, ViewMyProductActivity.this);
         categoryList.setAdapter(categoryAdapter);
 
 
-    }
-
-    public void onCategoryClick(String value) {
-        Toast.makeText(this, value, Toast.LENGTH_SHORT).show();
-        getProductByCategory(value);
     }
 
     @Override
@@ -178,7 +169,7 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
         switch (v.getId()) {
             case R.id.flBtnAddProduct:
                 if (currentUser.equalsIgnoreCase("")) {
-                    Toast.makeText(ViewProductsActivity.this, "You must login to use this function", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ViewMyProductActivity.this, "You must login to use this function", Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(this, LoginActivity.class);
                     startActivityForResult(intent, 0);
                 } else {
@@ -201,23 +192,22 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
                         menuItem.setChecked(true);
 
                         if (menuItem.toString().equalsIgnoreCase("login")) {
-                            Intent intent = new Intent(ViewProductsActivity.this, LoginActivity.class);
+                            Intent intent = new Intent(ViewMyProductActivity.this, LoginActivity.class);
                             startActivity(intent);
                         } else if (menuItem.toString().equalsIgnoreCase("logout")) {
-                            Entity.deleteCurrentUser(ViewProductsActivity.this);
-                            Intent intent = new Intent(ViewProductsActivity.this, ViewProductsActivity.class);
+                            Entity.deleteCurrentUser(ViewMyProductActivity.this);
+                            Intent intent = new Intent(ViewMyProductActivity.this, ViewProductsActivity.class);
                             startActivity(intent);
                             finish();
                         } else if (menuItem.toString().equalsIgnoreCase("register")) {
-                            Entity.deleteCurrentUser(ViewProductsActivity.this);
-                            Intent intent = new Intent(ViewProductsActivity.this, RegisterActivity.class);
+                            Entity.deleteCurrentUser(ViewMyProductActivity.this);
+                            Intent intent = new Intent(ViewMyProductActivity.this, RegisterActivity.class);
                             startActivity(intent);
                         } else if (menuItem.toString().equalsIgnoreCase("home")) {
-                            Intent intent = new Intent(ViewProductsActivity.this, ViewProductsActivity.class);
+                            Intent intent = new Intent(ViewMyProductActivity.this, ViewProductsActivity.class);
                             startActivity(intent);
                         } else if (menuItem.toString().equalsIgnoreCase("My Product")) {
-                            Intent intent = new Intent(ViewProductsActivity.this, ViewMyProductActivity.class);
-                            startActivity(intent);
+
                         }
                         // close drawer when item is tapped
                         drawerLayout.closeDrawers();
@@ -290,80 +280,17 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    public void getProduct() {
-        int begin = (DATA_CURRENT_PAGE * DATA_PAGE_SIZE) - DATA_PAGE_SIZE;
-        int end = begin + DATA_PAGE_SIZE;
-        Uri.Builder builder = new Uri.Builder();
-        builder.scheme(Constants.HTTP_PROTOCOL)
-                .encodedAuthority(Constants.HOST)
-                .appendPath("product")
-                .appendPath("getAll")
-                .appendPath(String.valueOf(begin))
-                .appendPath(String.valueOf(end));
-        productUrl = builder.build().toString();
-        new getProduct().execute();
-        DATA_CURRENT_PAGE++;
-    }
-
-    private class getProduct extends AsyncTask<Void, Void, String> {
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            StringRequest strRequest = new StringRequest(Request.Method.GET, productUrl, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        System.out.println(productUrl);
-                        Gson gson = new Gson();
-                        Type collectionType = new TypeToken<ArrayList<Product>>() {
-                        }.getType();
-                        lstProduct = gson.fromJson(response, collectionType);
-                        String[] lstImage;
-                        for (int i = 0; i < lstProduct.size(); i++) {
-                            if (lstProduct.get(i).getImage_url() != null) {
-                                lstImage = lstProduct.get(i).getImage_url().split(",");
-                                lstProduct.get(i).setLst_images(Arrays.asList(lstImage));
-                            }
-                        }
-                        System.out.println("SIze=>>>>>>>>>>>" + lstProduct.size());
-                        if (isFirstTimeLoad) {
-                            loadProductList();
-                            isFirstTimeLoad = false;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-
-                }
-            });
-            mRequestQueue.add(strRequest);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String strings) {
-            super.onPostExecute(strings);
-        }
-    }
-
     public void getProductByCategory(String categoryName) {
-        int begin = (DATA_CURRENT_PAGE * DATA_PAGE_SIZE) - DATA_PAGE_SIZE;
-        int end = begin + DATA_PAGE_SIZE;
         Uri.Builder builder = new Uri.Builder();
         builder.scheme(Constants.HTTP_PROTOCOL)
                 .encodedAuthority(Constants.HOST)
                 .appendPath("product")
-                .appendPath("getByCat");
+                .appendPath("getProductByUser");
         getProdByCatUrl = builder.build().toString();
-        new getProductByCategory().execute(categoryName);
-        DATA_CURRENT_PAGE++;
+        new GetProductByCategory().execute(categoryName);
     }
 
-    private class getProductByCategory extends AsyncTask<String, Void, Void> {
+    private class GetProductByCategory extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(final String... categoryName) {
@@ -399,6 +326,7 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
                 @Override
                 protected Map<String, String> getParams() throws AuthFailureError {
                     HashMap<String, String> params = new HashMap<>();
+                    params.put("user", Entity.getCurrentUser(ViewMyProductActivity.this));
                     params.put("catName", categoryName[0]);
                     return params;
                 }
@@ -408,9 +336,25 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode == 200) {
+            if (requestCode == 1000) {
+                if (currentUser.equalsIgnoreCase("")) {
+                    initDrawer(R.menu.not_login_drawer_view);
+                } else {
+                    initDrawer(R.menu.logged_in_drawer_view);
+                }
+            }
+        }
+    }
+
+    public void onCategoryClick(String value) {
+        Toast.makeText(this, value, Toast.LENGTH_SHORT).show();
+        getProductByCategory(value);
+    }
 
     private String searchProductUrl = "";
-
     private void searchProduct() {
         Uri.Builder builder = new Uri.Builder();
         builder.scheme(Constants.HTTP_PROTOCOL)
@@ -455,20 +399,6 @@ public class ViewProductsActivity extends AppCompatActivity implements View.OnCl
             };
             mRequestQueue.add(strRequest);
             return null;
-        }
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (resultCode == 200) {
-            if (requestCode == 1000) {
-                if (currentUser.equalsIgnoreCase("")) {
-                    initDrawer(R.menu.not_login_drawer_view);
-                } else {
-                    initDrawer(R.menu.logged_in_drawer_view);
-                }
-            }
         }
     }
 }

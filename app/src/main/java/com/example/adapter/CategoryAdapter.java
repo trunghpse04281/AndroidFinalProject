@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.example.entities.Category;
 import com.example.finalproject.R;
+import com.example.finalproject.ViewMyProductActivity;
 import com.example.finalproject.ViewProductsActivity;
 import com.example.services.ItemClickListener;
 

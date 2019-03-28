@@ -70,6 +70,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         if (menuItem.toString().equalsIgnoreCase("login")) {
                             Intent intent = new Intent(LoginActivity.this, LoginActivity.class);
                             startActivity(intent);
+                        } else if (menuItem.toString().equalsIgnoreCase("logout")) {
+                            Entity.deleteCurrentUser(LoginActivity.this);
+                            Intent intent = new Intent(LoginActivity.this, ViewProductsActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else if (menuItem.toString().equalsIgnoreCase("register")) {
+                            Entity.deleteCurrentUser(LoginActivity.this);
+                            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                            startActivity(intent);
+                        } else if (menuItem.toString().equalsIgnoreCase("home")) {
+                            Intent intent = new Intent(LoginActivity.this, ViewProductsActivity.class);
+                            startActivity(intent);
+                        } else if (menuItem.toString().equalsIgnoreCase("My Product")) {
+                            Intent intent = new Intent(LoginActivity.this, ViewMyProductActivity.class);
+                            startActivity(intent);
                         }
                         // close drawer when item is tapped
                         drawerLayout.closeDrawers();
@@ -112,9 +127,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         switch (v.getId()) {
             case R.id.btnLogin:
                 logIn();
-                Intent intent = new Intent(LoginActivity.this, ViewProductsActivity.class);
-                startActivityForResult(intent, 1000);
-                finish();
                 break;
             case R.id.btnCancel:
                 break;
@@ -140,28 +152,37 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 @Override
                 public void onResponse(String response) {
                     Log.e(tag, "onResponse: " + response);
+                    Log.e(tag, "Url: " + loginUrl);
                     try {
-                        if (!response.trim().equals("")) {
+                        if (response.trim().equals("")) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(LoginActivity.this, "Server fail", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        } else {
                             current_user = new User();
                             Gson gson = new Gson();
                             current_user = gson.fromJson(response, User.class);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Entity.saveCurrentUser(LoginActivity.this, current_user);
-                                }
-                            });
-                            Toast.makeText(LoginActivity.this, "Login Successfully", Toast.LENGTH_LONG).show();
-                        } else {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(LoginActivity.this, "Login fail", Toast.LENGTH_LONG).show();
-                                }
-                            });
+
+                            if (current_user != null) {
+                                Entity.saveCurrentUser(LoginActivity.this, current_user);
+                                Intent intent = new Intent(LoginActivity.this, ViewProductsActivity.class);
+                                startActivityForResult(intent, 1000);
+                                finish();
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Login fail", Toast.LENGTH_LONG).show();
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(LoginActivity.this, "Login fail", Toast.LENGTH_LONG).show();
+                            }
+                        });
                     }
                 }
             }, new Response.ErrorListener() {
@@ -186,7 +207,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            System.out.println("onPost");
         }
     }
 

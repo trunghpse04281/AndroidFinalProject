@@ -5,11 +5,14 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_Home"
+            android:title="Home" />
+        <item
             android:id="@+id/nav_login"
-            android:title="@string/btnLoginText" />
+            android:title="@string/btnLoginLabel" />
 
         <item
             android:id="@+id/nav_register"
-            android:title="@string/registerText" />
+            android:title="@string/registerLabel" />
     </group>
 </menu>

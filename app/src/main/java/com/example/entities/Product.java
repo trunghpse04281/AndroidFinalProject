@@ -1,7 +1,6 @@
 package com.example.entities;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Product implements Serializable {
@@ -11,21 +10,25 @@ public class Product implements Serializable {
     private String image_url;
     private double price;
     private String category;
-    private String onwer;
+    private String owner;
     private List<String> lst_images;
     private String status;
+    private String ownerPhone;
 
     public Product() {
     }
 
-    public Product(int id, String name, String description, String image_url, double price, String category, String onwer) {
+    public Product(int id, String name, String description, String image_url, double price, String category, String owner, List<String> lst_images, String status, String ownerPhone) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.image_url = image_url;
         this.price = price;
         this.category = category;
-        this.onwer = onwer;
+        this.owner = owner;
+        this.lst_images = lst_images;
+        this.status = status;
+        this.ownerPhone = ownerPhone;
     }
 
     public int getId() {
@@ -76,12 +79,12 @@ public class Product implements Serializable {
         this.category = category;
     }
 
-    public String getOnwer() {
-        return onwer;
+    public String getOwner() {
+        return owner;
     }
 
-    public void setOnwer(String onwer) {
-        this.onwer = onwer;
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public List<String> getLst_images() {
@@ -98,5 +101,13 @@ public class Product implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getOwnerPhone() {
+        return ownerPhone;
+    }
+
+    public void setOwnerPhone(String ownerPhone) {
+        this.ownerPhone = ownerPhone;
     }
 }

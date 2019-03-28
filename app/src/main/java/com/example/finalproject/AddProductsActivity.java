@@ -41,6 +41,7 @@ import com.example.adapter.CategoryAdapterForSpinner;
 import com.example.adapter.ImageAdapter;
 import com.example.entities.Category;
 import com.example.services.Constants;
+import com.example.services.Entity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -115,6 +116,21 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
 
                         if (menuItem.toString().equalsIgnoreCase("login")) {
                             Intent intent = new Intent(AddProductsActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                        } else if (menuItem.toString().equalsIgnoreCase("logout")) {
+                            Entity.deleteCurrentUser(AddProductsActivity.this);
+                            Intent intent = new Intent(AddProductsActivity.this, ViewProductsActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else if (menuItem.toString().equalsIgnoreCase("register")) {
+                            Entity.deleteCurrentUser(AddProductsActivity.this);
+                            Intent intent = new Intent(AddProductsActivity.this, RegisterActivity.class);
+                            startActivity(intent);
+                        } else if (menuItem.toString().equalsIgnoreCase("home")) {
+                            Intent intent = new Intent(AddProductsActivity.this, ViewProductsActivity.class);
+                            startActivity(intent);
+                        } else if (menuItem.toString().equalsIgnoreCase("My Product")) {
+                            Intent intent = new Intent(AddProductsActivity.this, ViewMyProductActivity.class);
                             startActivity(intent);
                         }
                         // close drawer when item is tapped
@@ -363,6 +379,7 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
                     Gson gson = new Gson();
                     System.out.println(response);
                     currentID = Integer.parseInt(response);
+                    Toast.makeText(AddProductsActivity.this, "Add Successfully", Toast.LENGTH_LONG).show();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -381,7 +398,7 @@ public class AddProductsActivity extends AppCompatActivity implements View.OnCli
                 params.put("description", editProductDes.getText().toString());
                 params.put("image_url", imgeString);
                 params.put("category", curentCategory);
-                params.put("owner", "trung");
+                params.put("owner", Entity.getCurrentUser(AddProductsActivity.this));
                 params.put("status", "Còn hàng");
                 return params;
             }
